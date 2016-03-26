@@ -24,7 +24,6 @@ import android.widget.TextView;
 import common.design.layout.LayoutUtils;
 import common.design.layout.ScreenAdapter;
 import common.list.adapter.ItemCallBack;
-import common.list.adapter.ItemResult;
 import common.list.adapter.MyListAdapter;
 import common.list.adapter.ViewHolder;
 
@@ -32,9 +31,13 @@ public class PlayListActivity extends HeaderBarActivity {
 	ListView				m_listMainMenu = null;
 	ListView				m_listCategoryMenu = null;
 	GridView				m_gridItems	= null;
-	MenuAdapter 			m_adapterMenu = null;
 	
-	int						m_nSelected = 0;
+	MyListAdapter 			m_adapterMenu = null;
+	MyListAdapter 			m_adapterSubcategory = null;
+	MyListAdapter 			m_adapterPlaylist = null;
+	
+	int						m_nMenuSelectedNumber = 0;
+	int						m_nSubcategorySelectedNumber = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +57,25 @@ public class PlayListActivity extends HeaderBarActivity {
 		
 	}
 	
+	
+	protected void layoutControls()
+	{
+		super.layoutControls();
+		
+		LayoutUtils.setSize(m_listMainMenu, ScreenAdapter.getDeviceWidth() / 8, LayoutParams.WRAP_CONTENT, false);
+	}
+	
 	protected void initData()
 	{
 		super.initData();
 		
-		m_nSelected = 0;
+		initMenuItems();
+		initSubcategoryItems();
+	}
+	
+	private void initMenuItems()
+	{
+		m_nMenuSelectedNumber = 0;
 		
 		String [] menuLabel = {"Home", "LiveTV", "Radio", "My account", "Package"};
 		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.movie_icon, R.drawable.radio_icon, R.drawable.account_icon};
@@ -77,17 +94,35 @@ public class PlayListActivity extends HeaderBarActivity {
 			}	
     	}
 		
-    	m_adapterMenu = new MenuAdapter(this, list, R.layout.fragment_category_item, null);
-		
+    	m_adapterMenu = new MenuAdapter(this, list, R.layout.fragment_category_item, null);		
 		m_listMainMenu.setAdapter(m_adapterMenu);	
 	}
 	
-	protected void layoutControls()
+	private void initSubcategoryItems()
 	{
-		super.layoutControls();
+		m_nSubcategorySelectedNumber = 0;
 		
-		LayoutUtils.setSize(m_listMainMenu, ScreenAdapter.getDeviceWidth() / 8, LayoutParams.WRAP_CONTENT, false);
+		String [] englishLabel = {"My Favorites", "All", "News", "Sports", "Movies", "Music and Entertaintment", "Kids", "By Region", "Other language"};
+		String [] indiaLabel = {"My Favorites", "All", "News", "Sports", "Movies", "Music and Entertaintment", "Kids", "By Region", "Other language"};
+		
+		List<JSONObject> list = new ArrayList<JSONObject>();
+		for(int i = 0; i < englishLabel.length; i++)
+    	{
+    		JSONObject item = new JSONObject();
+    		
+    		try {
+				item.put("english", englishLabel[i]);
+				item.put("india", indiaLabel[i]);
+				list.add(item);
+			} catch (JSONException e) {			
+				e.printStackTrace();
+			}	
+    	}
+		
+		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
+		m_listCategoryMenu.setAdapter(m_adapterSubcategory);	
 	}
+
 	
 	protected void initEvents()
 	{ 
@@ -97,8 +132,19 @@ public class PlayListActivity extends HeaderBarActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				m_nSelected = position;
+				m_nMenuSelectedNumber = position;
 				m_adapterMenu.notifyDataSetChanged();
+			}
+		});
+		
+		m_listMainMenu.requestFocus();
+		
+		m_listCategoryMenu.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				m_nSubcategorySelectedNumber = position;
+				m_adapterSubcategory.notifyDataSetChanged();
 			}
 		});
 		
@@ -113,16 +159,16 @@ public class PlayListActivity extends HeaderBarActivity {
 				case KeyEvent.KEYCODE_DPAD_LEFT:
 					if( event.getAction() == KeyEvent.ACTION_UP)
 					{
-						m_nSelected = (m_nSelected - 1) % m_gridItems.getCount();
-						m_gridItems.setSelection(m_nSelected);
+						m_nMenuSelectedNumber = (m_nMenuSelectedNumber - 1) % m_gridItems.getCount();
+						m_gridItems.setSelection(m_nMenuSelectedNumber);
 //						m_adapterItemGrid.notifyDataSetChanged();
 					}
 					return false;
 				case KeyEvent.KEYCODE_DPAD_RIGHT:
 					if( event.getAction() == KeyEvent.ACTION_UP)
 					{
-						m_nSelected = (m_nSelected + 1) % m_gridItems.getCount();
-						m_gridItems.setSelection(m_nSelected);
+						m_nMenuSelectedNumber = (m_nMenuSelectedNumber + 1) % m_gridItems.getCount();
+						m_gridItems.setSelection(m_nMenuSelectedNumber);
 //						m_adapterItemGrid.notifyDataSetChanged();
 					}
 					return false;
@@ -133,8 +179,6 @@ public class PlayListActivity extends HeaderBarActivity {
 				return false;
 			}
 		});
-//		m_adapterItemGrid.setOnKeyListener(menuKeyListener);
-		m_gridItems.requestFocus();
 		
 	}
 	class MenuAdapter extends MyListAdapter{
@@ -158,14 +202,41 @@ public class PlayListActivity extends HeaderBarActivity {
     		((ImageView)ViewHolder.get(rowView, R.id.img_thumbnail)).setImageResource(item.optInt("icon", R.drawable.ic_launcher));
     		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setText(item.optString("label", ""));    		
     		
-    		if( m_nSelected == position )
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.button_selected);
+    		if( m_nMenuSelectedNumber == position )
+    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.menu_selected);
     		else
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.button_normal);
+    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.menu_normal);
     			
     	}
     }
 	 
+	class SubcategoryAdapter extends MyListAdapter{
+
+    	public SubcategoryAdapter(Context context, List<JSONObject> data, 
+    			int resource, ItemCallBack callback) {
+    		super(context, data, resource, callback);
+    	}
+    	
+    	@Override
+    	protected void loadItemViews(View rowView, final int position)
+    	{
+    		final JSONObject item = getItem(position);
+    		
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_english), 20, 30, 10, 30, true);
+    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
+    		
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 10, 30, 20, 30, true);
+    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
+    		
+    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString("english", ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setText(item.optString("india", ""));
+    		
+    		if( m_nSubcategorySelectedNumber == position )
+    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.subcategory_selected);
+    		else
+    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.subcategory_normal);
+    	}
+    }
 	 
 }
 

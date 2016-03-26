@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/lay_fragment"
+	android:layout_width="fill_parent" 
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"	
+	android:gravity="center_vertical"
+	android:background="@drawable/subcategory_bg"
+	>
+	<TextView
+	    android:id="@+id/txt_english"
+	    android:layout_width="0dip"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="0.5"
+	    android:singleLine="true"
+	    android:ellipsize="end"
+	    android:text="Sports"	    
+	    android:textStyle="bold"
+	    android:textColor="@color/white"
+	    />
+	<TextView
+	    android:id="@+id/txt_india"
+	    android:layout_width="0dip"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="0.5"
+	    android:singleLine="true"
+	    android:ellipsize="end"
+	    android:gravity="center_vertical|right"
+	    android:text="Sports"
+	    android:textStyle="bold"
+	    android:textColor="@color/white"
+	    />
+</LinearLayout>

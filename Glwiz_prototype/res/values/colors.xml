@@ -11,31 +11,8 @@
 	<color name="gray">#c0c0c0</color>
 	<color name="transparent">#00000000</color>
     
-	<color name="app_theme_color">#ff7310</color>
+	<color name="app_theme_color">#ff6101</color>
 	<color name="app_back_color">#373737</color>	
-	<color name="app_darker_color">#c7c7c7</color>   
-    <color name="app_grey_color">#939598</color>
-    <color name="app_text_color">#333333</color>
-    <color name="app_red_color">#df0000</color>
-    
-    
-    <color name="green_button_color">#60aa17</color>
-    <color name="green_darker_button_color">#4c8415</color>
-    
-    <color name="green_orrange_color">#60aa17</color>
-    <color name="green_orrange_button_color">#4c8415</color>
-    
-    <color name="red_button_color">#b00c0c</color>
-    <color name="red_darker_button_color">#7f0909</color>
-    
-    <color name="orange_darker">#b5791f</color>
-    <color name="menu_background_color">#fff3c8</color>
-    
-
-    <color name="white_darker">#f2f0f1</color>
-    <color name="light_grey">#dedede</color>
-    <color name="footbar_color">#231f20</color>
-    <color name="dark_gray">#ff7d7d7d</color>
-    <color name="white_gray">#F1F2F6</color>
+	<color name="app_highlight_back_color">#433e3e</color>
 	
 </resources>
