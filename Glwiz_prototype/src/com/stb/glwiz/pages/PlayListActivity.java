@@ -11,7 +11,6 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.stb.glwiz.R;
 import com.stb.glwiz.network.ServerManager;
-import com.stb.glwiz.network.ServerTask;
 
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
@@ -31,10 +30,10 @@ import common.design.layout.ScreenAdapter;
 import common.image.load.ImageUtils;
 import common.library.utils.AlgorithmUtils;
 import common.library.utils.MessageUtils;
-import common.library.utils.MyTime;
 import common.list.adapter.ItemCallBack;
 import common.list.adapter.MyListAdapter;
 import common.list.adapter.ViewHolder;
+import common.manager.activity.ActivityManager;
 import common.network.utils.LogicResult;
 import common.network.utils.ResultCallBack;
 
@@ -49,6 +48,7 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	int						m_nMenuSelectedNumber = 0;
 	int						m_nSubcategorySelectedNumber = 0;
+	int						m_nPlaylistSelectedNumber = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +160,8 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private void showPlayList(JSONArray array)
 	{
+		m_nPlaylistSelectedNumber = 0;
+		
 		m_adapterPlaylist = new PlayListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_playlist_item, null);
 		
 		m_gridItems.setAdapter(m_adapterPlaylist);
@@ -189,6 +191,15 @@ public class PlayListActivity extends HeaderBarActivity {
 			}
 		});
 		
+		m_gridItems.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				m_nPlaylistSelectedNumber = position;
+				m_adapterPlaylist.notifyDataSetChanged();
+				gotoPlayerPage(position);
+			}
+		});
 		m_gridItems.setOnKeyListener(new OnKeyListener() {
 			
 			@Override
@@ -222,6 +233,19 @@ public class PlayListActivity extends HeaderBarActivity {
 		});
 		
 	}
+	
+	private void gotoPlayerPage(int pos)
+	{
+		JSONObject data = m_adapterPlaylist.getItem(pos);
+		if( data == null )
+			return;
+		
+		Bundle bundle = new Bundle();
+		bundle.putString(INTENT_EXTRA, data.toString());
+		ActivityManager.changeActivity(this, PlayerActivity.class, bundle, false, null );
+
+	}
+	
 	class MenuAdapter extends MyListAdapter{
 
     	public MenuAdapter(Context context, List<JSONObject> data, 
