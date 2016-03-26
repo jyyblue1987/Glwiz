@@ -1,7 +1,10 @@
 package common.library.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class AlgorithmUtils {
@@ -30,5 +33,15 @@ public class AlgorithmUtils {
 		}
 	 }
 	 
-	 
+	 public static List<JSONObject> jsonarrayToList(JSONArray array)
+	 {
+		 List<JSONObject> list = new ArrayList<JSONObject>();
+		 if( array == null )
+			 return list;
+		 
+		 for(int i = 0; i < array.length(); i++ )
+			 list.add(array.optJSONObject(i));
+		 
+		 return list;		 
+	 }	 
 }

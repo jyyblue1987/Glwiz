@@ -3,10 +3,15 @@ package com.stb.glwiz.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.stb.glwiz.R;
+import com.stb.glwiz.network.ServerManager;
+import com.stb.glwiz.network.ServerTask;
 
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
@@ -23,9 +28,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import common.design.layout.LayoutUtils;
 import common.design.layout.ScreenAdapter;
+import common.image.load.ImageUtils;
+import common.library.utils.AlgorithmUtils;
+import common.library.utils.MessageUtils;
+import common.library.utils.MyTime;
 import common.list.adapter.ItemCallBack;
 import common.list.adapter.MyListAdapter;
 import common.list.adapter.ViewHolder;
+import common.network.utils.LogicResult;
+import common.network.utils.ResultCallBack;
 
 public class PlayListActivity extends HeaderBarActivity {
 	ListView				m_listMainMenu = null;
@@ -71,6 +82,7 @@ public class PlayListActivity extends HeaderBarActivity {
 		
 		initMenuItems();
 		initSubcategoryItems();
+		getPlayListItem("21");
 	}
 	
 	private void initMenuItems()
@@ -123,6 +135,35 @@ public class PlayListActivity extends HeaderBarActivity {
 		m_listCategoryMenu.setAdapter(m_adapterSubcategory);	
 	}
 
+	private void getPlayListItem(String category_id)
+	{
+		showLoadingProgress();
+		
+		ServerManager.getChannelList(category_id, new ResultCallBack() {
+			
+			@Override
+			public void doAction(LogicResult result) {
+				hideProgress();
+				
+				JSONObject data = result.getData();
+				if( data == null || data.has("channels_list") == false )
+				{
+					MessageUtils.showMessageDialog(PlayListActivity.this, "There is no channel list");
+					return;
+				}		
+				
+				JSONArray array = data.optJSONArray("channels_list");
+				showPlayList(array);								
+			}
+		});
+	}
+	
+	private void showPlayList(JSONArray array)
+	{
+		m_adapterPlaylist = new PlayListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_playlist_item, null);
+		
+		m_gridItems.setAdapter(m_adapterPlaylist);
+	}
 	
 	protected void initEvents()
 	{ 
@@ -237,6 +278,39 @@ public class PlayListActivity extends HeaderBarActivity {
     			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.subcategory_normal);
     	}
     }
+	
+	class PlayListAdapter extends MyListAdapter {
+		public PlayListAdapter(Context context, List<JSONObject> data,
+			int resource, ItemCallBack callback) {
+			super(context, data, resource, callback);
+		}
+		@Override
+		protected void loadItemViews(View rowView, int position)
+		{
+			final JSONObject item = getItem(position);
+			
+			int iconsize = ScreenAdapter.computeHeight(93);
+			LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.img_thumbnail), 20, 11, 0, 11, true);
+			LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), iconsize, iconsize, false);
+			
+	  		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.lay_channel), 10, 0, 0, 0, true);
+	  		
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));    		
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 0, 20, 0, 0, true);
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
+
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.lay_menu), 10, 0, 20, 0, true);
+    		
+    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_menu_icon), 70, 70, true);
+    		((TextView)ViewHolder.get(rowView, R.id.txt_menu_label)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(25));
+			
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setText(item.optString("channel_id", ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setText(item.optString("channel_title", ""));
+    		
+			DisplayImageOptions options = ImageUtils.buildUILOption(R.drawable.ic_launcher).build();
+			ImageLoader.getInstance().displayImage(item.optString("channel_thumbnail", ""), (ImageView)ViewHolder.get(rowView, R.id.img_thumbnail), options);
+		}	
+	}
 	 
 }
 

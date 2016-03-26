@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"    
+    android:orientation="vertical"
     >
     <include
         android:id="@+id/fragment_header"
@@ -45,7 +45,7 @@
 	            >
 	        </ListView>
         </LinearLayout>
-        
+
 	    <GridView 
 		    android:id="@+id/grid_item"
 		    android:layout_width="0dip"
@@ -54,7 +54,8 @@
 		    android:layout_weight="0.7"			
 		    android:horizontalSpacing="2dip"
 			android:verticalSpacing="2dip"
-		    android:background="@color/white" >
+		    android:background="#373737"
+		    >
 		</GridView>    
     </LinearLayout>
         
