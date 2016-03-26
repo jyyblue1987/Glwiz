@@ -12,9 +12,10 @@ import tv.danmaku.ijk.media.widget.MediaController;
 import tv.danmaku.ijk.media.widget.VideoView;
 
 public class PlayerActivity extends BaseActivity {
-	private VideoView mVideoView;
+	private VideoView 			mVideoView;
+	private MediaController 	m_MediaController = null;
+	
 	private View mBufferingIndicator;
-	private MediaController mMediaController;
 	
 	JSONObject	m_channelInfo = new JSONObject();
 	
@@ -24,16 +25,26 @@ public class PlayerActivity extends BaseActivity {
 
 		setContentView(R.layout.layout_videoview);
 
-		playfunction();	
-
+		loadComponents();
 	}
-
 	
-	void playfunction(){
+	protected void findViews()
+	{
+		super.findViews();
+
+		mVideoView = (VideoView) findViewById(R.id.video_view);
+		m_MediaController = new MediaController(this);
+		mVideoView.setMediaController(m_MediaController);
+		mBufferingIndicator = findViewById(R.id.buffering_indicator);
+		
+		
+	}
+	
+	protected void initData()
+	{
+		super.initData();
 		
 		Bundle bundle = getIntent().getExtras();
-		
-		String path="http://dlqncdn.miaopai.com/stream/MVaux41A4lkuWloBbGUGaQ__.mp4";
 		if( bundle != null )
 		{
 			try {
@@ -43,23 +54,18 @@ public class PlayerActivity extends BaseActivity {
 				e.printStackTrace();
 			}			
 		}
-				
-		path = m_channelInfo.optString("channel_url", "");
-        if (path == "") {
-			// Tell the user to provide a media file URL/path.
-			Toast.makeText(this, "Please edit VideoViewDemo Activity, and set path" + " variable to your media file URL/path", Toast.LENGTH_LONG).show();
-			return;
-		} else {
-			mBufferingIndicator = findViewById(R.id.buffering_indicator);
-			mMediaController = new MediaController(this);
 		
-			mVideoView = (VideoView) findViewById(R.id.video_view);
-			mVideoView.setMediaController(mMediaController);
-			mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
-			mVideoView.setVideoPath(path);
-			mVideoView.requestFocus();
-			mVideoView.start();
-		}      	
+		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
+		
+		playChannel(m_channelInfo.optString("channel_url", ""));
+	}
+	
+	void playChannel(String url)
+	{
+		mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
+		mVideoView.setVideoPath(url);
+		mVideoView.requestFocus();
+		mVideoView.start();		      	
 	}
 }
 
