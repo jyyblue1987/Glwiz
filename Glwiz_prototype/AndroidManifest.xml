@@ -30,6 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".pages.CategoryActivity" android:screenOrientation="landscape"/>
+        <activity android:name=".pages.PlayListActivity" android:screenOrientation="landscape"/>
     </application>
 
 </manifest>
