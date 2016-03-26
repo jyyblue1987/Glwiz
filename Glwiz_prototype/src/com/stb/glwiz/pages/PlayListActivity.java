@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.stb.glwiz.Const;
 import com.stb.glwiz.R;
 import com.stb.glwiz.network.ServerManager;
 
@@ -328,11 +329,11 @@ public class PlayListActivity extends HeaderBarActivity {
     		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_menu_icon), 70, 70, true);
     		((TextView)ViewHolder.get(rowView, R.id.txt_menu_label)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(25));
 			
-    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setText(item.optString("channel_id", ""));
-    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setText(item.optString("channel_title", ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setText(item.optString(Const.CHANNEL_ID, ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setText(item.optString(Const.CHANNEL_TITLE, ""));
     		
 			DisplayImageOptions options = ImageUtils.buildUILOption(R.drawable.ic_launcher).build();
-			ImageLoader.getInstance().displayImage(item.optString("channel_thumbnail", ""), (ImageView)ViewHolder.get(rowView, R.id.img_thumbnail), options);
+			ImageLoader.getInstance().displayImage(item.optString(Const.CHANNEL_THUMBNAIL, ""), (ImageView)ViewHolder.get(rowView, R.id.img_thumbnail), options);
 		}	
 	}
 	 
