@@ -1,9 +1,9 @@
-package com.stb.glwiz;
+package com.stb.glwiz.pages;
+
+import com.stb.glwiz.R;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class LoginActivity extends Activity {
 

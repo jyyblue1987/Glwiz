@@ -7,14 +7,20 @@
     <uses-sdk
         android:minSdkVersion="12"
         android:targetSdkVersion="22" />
+    
+    <!-- Network permission -->
+    <uses-permission android:name="android.permission.INTERNET" />	
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:name=".GlwizApplication"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".LoginActivity"
+            android:name=".pages.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
