@@ -11,17 +11,24 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" 
-        android:gravity="center"
         android:orientation="horizontal"
         >
-        <ListView
-            android:id="@+id/list_menu"
-            android:layout_width="100dip"
-            android:layout_height="match_parent" 
-            android:cacheColorHint="#00000000"
-            android:divider="@null"
+        <LinearLayout
+            android:layout_width="wrap_content" 
+            android:layout_height="match_parent"
+            android:background="@color/app_back_color"
             >
-        </ListView>
+        	<ListView
+	            android:id="@+id/list_menu"
+	            android:layout_width="100dip"
+	            android:layout_height="match_parent" 
+	            android:cacheColorHint="#00000000"
+	            android:scrollbars="none"
+	            android:divider="@null"	            
+	            >
+	        </ListView>    
+        </LinearLayout>
+        
         <ListView
             android:id="@+id/list_subcategory"
             android:layout_width="0dip"

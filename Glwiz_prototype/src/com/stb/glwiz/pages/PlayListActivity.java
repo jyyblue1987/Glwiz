@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import com.stb.glwiz.R;
 
+import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -85,19 +86,19 @@ public class PlayListActivity extends HeaderBarActivity {
 	{
 		super.layoutControls();
 		
-		LayoutUtils.setMargin(m_gridItems, ScreenAdapter.getDeviceWidth() / 6, 0, ScreenAdapter.getDeviceWidth() / 6, 0, true);
+		LayoutUtils.setSize(m_listMainMenu, ScreenAdapter.getDeviceWidth() / 8, LayoutParams.WRAP_CONTENT, false);
 	}
 	
 	protected void initEvents()
 	{ 
 		super.initEvents();
 
-		m_gridItems.setOnItemClickListener(new OnItemClickListener() {
+		m_listMainMenu.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nSelected = position;
-//				m_adapterItemGrid.notifyDataSetChanged();
+				m_adapterMenu.notifyDataSetChanged();
 			}
 		});
 		
@@ -148,11 +149,11 @@ public class PlayListActivity extends HeaderBarActivity {
     	{
     		final JSONObject item = getItem(position);
     		
-    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), 140, 140, true);    		
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.img_thumbnail), 0, 60, 0, 0, true);
+    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), 80, 80, true);    		
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.img_thumbnail), 0, 20, 0, 0, true);
     		
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_name), 0, 20, 0, 60, true);
-    		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(60));
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_name), 0, 20, 0, 20, true);
+    		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
     		
     		((ImageView)ViewHolder.get(rowView, R.id.img_thumbnail)).setImageResource(item.optInt("icon", R.drawable.ic_launcher));
     		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setText(item.optString("label", ""));    		

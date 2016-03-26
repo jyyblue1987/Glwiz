@@ -141,7 +141,7 @@ public class CategoryActivity extends HeaderBarActivity {
 	private void gotoPlayListPage(int position)
 	{
 		Bundle bundle = new Bundle();
-		ActivityManager.changeActivity(this, PlayListActivity.class, bundle, true, null );
+		ActivityManager.changeActivity(this, PlayListActivity.class, bundle, false, null );
 	}
 	
 	class ItemGridAdapter extends MyListAdapter{
