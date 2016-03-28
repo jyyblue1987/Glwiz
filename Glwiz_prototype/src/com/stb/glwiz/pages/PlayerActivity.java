@@ -51,6 +51,8 @@ public class PlayerActivity extends BaseActivity {
 	View			m_channelInfoPanel = null;
 	View			m_channelListPanel = null;
 	
+	TextView		m_txtGotoChannelNumber = null;
+	
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -75,6 +77,8 @@ public class PlayerActivity extends BaseActivity {
 		m_txtChannelNumber = (TextView) findViewById(R.id.txt_channel_num);
 		m_txtChannelTitle = (TextView) findViewById(R.id.txt_channel_title);
 		m_txtChannelCount = (TextView) findViewById(R.id.txt_channel_count);
+		
+		m_txtGotoChannelNumber = (TextView) findViewById(R.id.txt_channel_gotonum);
 		
 		m_listChannelList = (ListView) findViewById(R.id.list_channel);
 	}
@@ -104,6 +108,8 @@ public class PlayerActivity extends BaseActivity {
 		LayoutUtils.setSize(findViewById(R.id.img_rightarrow), 30, 50, true);
 		
 		m_txtChannelCount.setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
+		m_txtGotoChannelNumber.setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
+		LayoutUtils.setMargin(m_txtGotoChannelNumber, 0, 20, 20, 0, true);		
 	}
 	
 	protected void initData()
@@ -123,6 +129,8 @@ public class PlayerActivity extends BaseActivity {
 		
 		m_channelInfoPanel.setVisibility(View.GONE);
 		m_channelListPanel.setVisibility(View.GONE);
+		m_txtGotoChannelNumber.setVisibility(View.GONE);
+		m_txtGotoChannelNumber.setText("");
 		
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
@@ -265,6 +273,12 @@ public class PlayerActivity extends BaseActivity {
 			return onDownButtonPressed();
 		}
 		
+		if( KeyEvent.KEYCODE_0 <= keyCode || 
+				keyCode <= KeyEvent.KEYCODE_9	)
+		{
+			return onNumberButtonPressed(keyCode - KeyEvent.KEYCODE_0);
+		}
+		
 		return false;
 	}
 	
@@ -322,6 +336,53 @@ public class PlayerActivity extends BaseActivity {
 		}
 	}
 	
+	Runnable JumpToChannel = new Runnable() {
+
+		@Override
+		public void run() {
+			try {
+				String text = m_txtGotoChannelNumber.getText().toString();
+				int currentChannel = Integer.parseInt(text);
+				currentChannel--;
+				m_txtGotoChannelNumber.setVisibility(View.GONE);
+				m_txtGotoChannelNumber.setText("");
+				playChannel(currentChannel);
+				
+				popupChannelInfo();
+			} catch (NumberFormatException e) {
+			}			
+		}
+	};
+	
+	private boolean onNumberButtonPressed(int digit)
+	{
+		if( isShowPannel() == true )
+		{
+			return false;			
+		}
+		else
+		{
+			m_txtGotoChannelNumber.setVisibility(View.VISIBLE);
+			m_txtGotoChannelNumber.removeCallbacks(JumpToChannel);
+			
+			String text = m_txtGotoChannelNumber.getText().toString();
+			if (text.equalsIgnoreCase("----")) {
+				text = "";
+			}
+			text = text + digit;
+			int currentChannel = Integer.parseInt(text);
+			
+			if (currentChannel > m_listChannelList.getAdapter().getCount()) {
+				text = "----";
+			}
+			m_txtGotoChannelNumber.setText(text);
+			
+			m_txtGotoChannelNumber.postDelayed(JumpToChannel, 5000);
+			
+			return true;
+		}
+	}
+	
 	private void playPrevChannel()
 	{
 		int position = m_nChannelSelectedNumber;
@@ -333,14 +394,7 @@ public class PlayerActivity extends BaseActivity {
 		int pos = (position + count - 1) % count;
 		playChannel(pos);
 		
-		showChannelInfoPanel();
-		
-		m_channelInfoPanel.postDelayed(new Runnable() {
-		    @Override
-		    public void run() {
-		    	hideChannelInfoPanel();
-		    }
-		}, 4000);
+		popupChannelInfo();
 	}
 	
 	private void playNextChannel()
@@ -354,6 +408,11 @@ public class PlayerActivity extends BaseActivity {
 		int pos = (position + count + 1) % count;
 		playChannel(pos);
 		
+		popupChannelInfo();		
+	}
+	
+	private void popupChannelInfo()
+	{
 		showChannelInfoPanel();
 		
 		m_channelInfoPanel.postDelayed(new Runnable() {
@@ -361,7 +420,7 @@ public class PlayerActivity extends BaseActivity {
 		    public void run() {
 		    	hideChannelInfoPanel();
 		    }
-		}, 4000);		
+		}, 4000);
 	}
 	class ChannelListAdapter extends MyListAdapter {
 		public ChannelListAdapter(Context context, List<JSONObject> data,
