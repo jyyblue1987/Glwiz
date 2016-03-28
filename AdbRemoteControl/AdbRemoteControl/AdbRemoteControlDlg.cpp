@@ -83,6 +83,9 @@ BEGIN_MESSAGE_MAP(CAdbRemoteControlDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_MENU, &CAdbRemoteControlDlg::OnBnClickedMenu)
 	ON_BN_CLICKED(IDC_POWER, &CAdbRemoteControlDlg::OnBnClickedPower)
 	ON_BN_CLICKED(IDC_NUMBER_0, &CAdbRemoteControlDlg::OnBnClickedNumber0)
+	ON_BN_CLICKED(IDC_PLAY_PAUSE, &CAdbRemoteControlDlg::OnBnClickedPlayPause)
+	ON_BN_CLICKED(IDC_PREV, &CAdbRemoteControlDlg::OnBnClickedPrev)
+	ON_BN_CLICKED(IDC_NEXT, &CAdbRemoteControlDlg::OnBnClickedNext)
 END_MESSAGE_MAP()
 
 
@@ -290,3 +293,21 @@ void CAdbRemoteControlDlg::OnBnClickedPower()
 }
 
 
+
+
+void CAdbRemoteControlDlg::OnBnClickedPlayPause()
+{
+	ShellExecute(GetSafeHwnd(), _T("open"), _T("adb.exe"), _T("shell input keyevent 85"), NULL, SW_HIDE);
+}
+
+
+void CAdbRemoteControlDlg::OnBnClickedPrev()
+{
+	ShellExecute(GetSafeHwnd(), _T("open"), _T("adb.exe"), _T("shell input keyevent 88"), NULL, SW_HIDE);
+}
+
+
+void CAdbRemoteControlDlg::OnBnClickedNext()
+{
+	ShellExecute(GetSafeHwnd(), _T("open"), _T("adb.exe"), _T("shell input keyevent 87"), NULL, SW_HIDE);
+}

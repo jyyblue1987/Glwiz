@@ -1,6 +1,8 @@
 package com.stb.glwiz.pages;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +53,11 @@ public class PlayerActivity extends BaseActivity {
 	View			m_channelInfoPanel = null;
 	View			m_channelListPanel = null;
 	
+	TextView		m_txtState = null;
 	TextView		m_txtGotoChannelNumber = null;
+	
+	private static Timer mTimer;
+	private static UpdateDurationTask mDurationTask;
 	
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -70,6 +76,8 @@ public class PlayerActivity extends BaseActivity {
 		m_MediaController = new MediaController(this);
 		mVideoView.setMediaController(m_MediaController);
 //		mBufferingIndicator = findViewById(R.id.buffering_indicator);
+
+		m_txtState = (TextView)findViewById(R.id.txt_state);
 		
 		m_channelInfoPanel = findViewById(R.id.lay_channel_info);
 		m_channelListPanel = findViewById(R.id.lay_channel_list);		
@@ -138,6 +146,8 @@ public class PlayerActivity extends BaseActivity {
 		playChannel(pos);		
 		showChannelList(m_channelInfo.optJSONArray(Const.ARRAY));
 		m_listChannelList.setSelection(pos);
+		
+		popupChannelInfo();
 	}
 	
 	protected void initEvents()
@@ -156,6 +166,9 @@ public class PlayerActivity extends BaseActivity {
 	
 	private void playChannel(int pos)
 	{
+		if( pos < 0 || pos >= m_channelInfo.length() )
+			return;
+		
 		m_nChannelSelectedNumber = pos;
 		JSONArray array = m_channelInfo.optJSONArray(Const.ARRAY);
 		JSONObject channel = array.optJSONObject(pos);
@@ -198,6 +211,7 @@ public class PlayerActivity extends BaseActivity {
 			// animate list panel
 			m_channelListPanel.setVisibility(View.VISIBLE);
 			m_channelListPanel.startAnimation(AnimationUtils.inFromLeftAnimation());
+			m_listChannelList.requestFocus();
 		}
 	}
 	
@@ -215,8 +229,7 @@ public class PlayerActivity extends BaseActivity {
 		if (m_channelInfoPanel.getVisibility() != View.VISIBLE) {
 			// animate info panel
 			m_channelInfoPanel.setVisibility(View.VISIBLE);
-			m_channelInfoPanel.startAnimation(AnimationUtils.inFromTopAnimation());
-			m_listChannelList.requestFocus();
+			m_channelInfoPanel.startAnimation(AnimationUtils.inFromTopAnimation());			
 		}
 	}
 	
@@ -247,11 +260,36 @@ public class PlayerActivity extends BaseActivity {
 	
 	private boolean handleKeyDown(int keyCode, KeyEvent event)
 	{
+		if( keyCode == KeyEvent.KEYCODE_DPAD_LEFT )
+		{
+			if( isShowPannel() == false )
+			{
+				buttonState = BACKRWARD_DOWN;
+				scheduleTask();
+				
+				return true;
+			}				
+		}
+		
+		if( keyCode == KeyEvent.KEYCODE_DPAD_RIGHT )
+		{
+			if( isShowPannel() == false )
+			{
+				buttonState = FORWARD_DOWN;
+				scheduleTask();
+				
+				return true;				
+			}
+		}
+			
 		return false;
 	}
 	
 	private boolean handleKeyUp(int keyCode, KeyEvent event)
 	{
+		buttonState = NONE_BOTH;
+		scheduleTask();
+		
 		if( keyCode == KeyEvent.KEYCODE_DPAD_CENTER )
 		{
 			onCenterButtonPressed();
@@ -262,13 +300,15 @@ public class PlayerActivity extends BaseActivity {
 		}
 		
 		if( keyCode == KeyEvent.KEYCODE_CHANNEL_UP || 
-			keyCode == KeyEvent.KEYCODE_DPAD_UP	)
+			keyCode == KeyEvent.KEYCODE_DPAD_UP	||
+			keyCode == KeyEvent.KEYCODE_MEDIA_PREVIOUS )
 		{
 			return onUpButtonPressed();
 		}
 		
 		if( keyCode == KeyEvent.KEYCODE_CHANNEL_DOWN || 
-				keyCode == KeyEvent.KEYCODE_DPAD_DOWN	)
+				keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
+				keyCode == KeyEvent.KEYCODE_MEDIA_NEXT )
 		{
 			return onDownButtonPressed();
 		}
@@ -422,6 +462,99 @@ public class PlayerActivity extends BaseActivity {
 		    }
 		}, 4000);
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		startScheduleTask();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		mDurationTask.cancel();
+		mTimer.cancel();
+	}
+	
+	private long previousClick = 0;
+	private int  buttonState = NONE_BOTH;
+	
+	private static final int BACKRWARD_DOWN = 0;
+	private static final int FORWARD_DOWN = 1;
+	private static final int NONE_BOTH = 2;
+	
+	private void startScheduleTask()
+	{
+		buttonState = NONE_BOTH;
+		mTimer = new Timer();
+	    mDurationTask = new UpdateDurationTask();
+		mTimer.schedule(mDurationTask, 0, 4000);
+	}
+	
+    private class UpdateDurationTask extends TimerTask {
+
+        @Override
+        public void run() {
+        	runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                	scheduleTask();
+                }
+            });
+        }
+    }
+    
+	private void  scheduleTask()
+	{
+		boolean state = false;
+		
+		long duration = 0;
+		duration = mVideoView.getDuration();
+		state = mVideoView.isInPlaybackState();
+		
+		if( buttonState == NONE_BOTH || state == false || duration <= 0 )
+		{
+			m_txtState.setVisibility(View.GONE);
+			previousClick = 0;
+			return;
+		}
+		
+		m_MediaController.show(8000);
+		
+		if( previousClick == 0 )
+			previousClick = System.currentTimeMillis() - 8 * 1000;		
+		
+		m_txtState.setVisibility(View.VISIBLE);
+		
+		long current = System.currentTimeMillis();
+		long gap = current - previousClick;
+		previousClick = current;
+		
+		long currentPos = 0;
+		
+		currentPos = mVideoView.getCurrentPosition();
+		
+		if( buttonState == BACKRWARD_DOWN )
+		{
+			m_txtState.setText("Backward 8x");
+			currentPos -= gap * 8;
+		}
+		else if( buttonState == FORWARD_DOWN )
+		{
+			m_txtState.setText("Forward 8x");
+			currentPos += gap * 8;
+		}
+		
+		
+		
+		if( currentPos < 0 || currentPos > duration )
+			currentPos = 0;
+
+		mVideoView.seekTo(currentPos);
+	}
+	
 	class ChannelListAdapter extends MyListAdapter {
 		public ChannelListAdapter(Context context, List<JSONObject> data,
 			int resource, ItemCallBack callback) {

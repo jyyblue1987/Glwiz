@@ -51,4 +51,7 @@ public:
 	afx_msg void OnBnClickedMenu();
 	afx_msg void OnBnClickedPower();
 	afx_msg void OnBnClickedNumber0();
+	afx_msg void OnBnClickedPlayPause();
+	afx_msg void OnBnClickedPrev();
+	afx_msg void OnBnClickedNext();
 };
