@@ -92,8 +92,8 @@ public class PlayListActivity extends HeaderBarActivity {
 	{
 		m_nMenuSelectedNumber = 0;
 		
-		String [] menuLabel = {"Home", "LiveTV", "Radio", "My account", "Package"};
-		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.movie_icon, R.drawable.radio_icon, R.drawable.account_icon};
+		String [] menuLabel = {"Home", "LiveTV", "Radio", "My account"};
+		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.movie_icon, R.drawable.radio_icon};
 		
 		List<JSONObject> list = new ArrayList<JSONObject>();
 		for(int i = 0; i < menuLabel.length; i++)
