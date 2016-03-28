@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -33,7 +35,7 @@ import tv.danmaku.ijk.media.widget.VideoView;
 public class PlayerActivity extends BaseActivity {
 	private VideoView 			mVideoView;
 	private MediaController 	m_MediaController = null;	
-	private View mBufferingIndicator;
+//	private View mBufferingIndicator;
 	
 	ListView		m_listChannelList = null;
 	MyListAdapter 	m_adapterChannel = null;
@@ -61,7 +63,7 @@ public class PlayerActivity extends BaseActivity {
 		mVideoView = (VideoView) findViewById(R.id.video_view);
 		m_MediaController = new MediaController(this);
 		mVideoView.setMediaController(m_MediaController);
-		mBufferingIndicator = findViewById(R.id.buffering_indicator);
+//		mBufferingIndicator = findViewById(R.id.buffering_indicator);
 		
 		m_txtChannelNumber = (TextView) findViewById(R.id.txt_channel_num);
 		m_txtChannelTitle = (TextView) findViewById(R.id.txt_channel_title);
@@ -117,23 +119,36 @@ public class PlayerActivity extends BaseActivity {
 		
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
-		playChannel(m_channelInfo);
-		
+		int pos = m_channelInfo.optInt(Const.POSITION, 0);		
+		playChannel(pos);		
+		showChannelList(m_channelInfo.optJSONArray(Const.ARRAY));
+		m_listChannelList.setSelection(pos);
 	}
 	
 	protected void initEvents()
 	{
 		super.initEvents();
+		
+		m_listChannelList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				hidePannels();
+				playChannel(position);
+			}
+		});
 	}
 	
-	private void playChannel(JSONObject channel)
+	private void playChannel(int pos)
 	{
+		JSONArray array = m_channelInfo.optJSONArray(Const.ARRAY);
+		JSONObject channel = array.optJSONObject(pos);
 		m_txtChannelNumber.setText("CH " + channel.optString(Const.CHANNEL_ID, "001"));
 		m_txtChannelTitle.setText(channel.optString(Const.CHANNEL_TITLE, ""));
 //		m_txtChannelCount.setText(channel.optString(Const.CHANNEL_TITLE, ""));
 		
 		String url = channel.optString(Const.CHANNEL_URL, "");
-		mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
+//		mVideoView.setMediaBufferingIndicator(mBufferingIndicator);
 		mVideoView.setVideoPath(url);
 		mVideoView.requestFocus();
 		mVideoView.start();		      	
@@ -141,9 +156,11 @@ public class PlayerActivity extends BaseActivity {
 	
 	private void showChannelList(JSONArray array)
 	{
+		m_txtChannelCount.setText("All (" + array.length() + ")");
+		
 		m_nChannelSelectedNumber = 0;
 		
-		m_adapterChannel = new ChannelListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_playlist_item, null);
+		m_adapterChannel = new ChannelListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_nowplaylist_item, null);
 		
 		m_listChannelList.setAdapter(m_adapterChannel);
 	}
@@ -152,6 +169,8 @@ public class PlayerActivity extends BaseActivity {
 	{
 		findViewById(R.id.lay_channel_info).setVisibility(View.VISIBLE);
 		findViewById(R.id.lay_channel_list).setVisibility(View.VISIBLE);
+		
+		m_listChannelList.requestFocus();
 	}
 	private void hidePannels()
 	{
@@ -183,7 +202,7 @@ public class PlayerActivity extends BaseActivity {
 	{
 		if( keyCode == KeyEvent.KEYCODE_DPAD_CENTER )
 		{
-			showPannels();
+			onCenterButtonPressed();
 		}
 		if( keyCode == KeyEvent.KEYCODE_BACK )
 		{
@@ -199,6 +218,16 @@ public class PlayerActivity extends BaseActivity {
 		
 		return false;		
 	}
+	
+	private boolean onCenterButtonPressed()
+	{
+		if( isShowPannel() == true )
+			return false;
+		
+		showPannels();
+		return true;
+	}
+	
 	private boolean onBackButtonPressed()
 	{
 		if( isShowPannel() == true )
@@ -220,19 +249,15 @@ public class PlayerActivity extends BaseActivity {
 			final JSONObject item = getItem(position);
 			
 			int iconsize = ScreenAdapter.computeHeight(93);
-			LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.img_thumbnail), 20, 11, 0, 11, true);
-			LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), iconsize, iconsize, false);
 			
-	  		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.lay_channel), 10, 0, 0, 0, true);
-	  		
-    		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));    		
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 0, 20, 0, 0, true);
+			LayoutUtils.setSize(ViewHolder.get(rowView, R.id.txt_channel_id), 120, LayoutParams.WRAP_CONTENT, true);
+			((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
+			
+			LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.img_thumbnail), 0, 11, 0, 11, true);
+			LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), iconsize, iconsize, false);
+			    		
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_channel_title), 30, 0, 30, 0, true);
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
-
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.lay_menu), 10, 0, 20, 0, true);
-    		
-    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_menu_icon), 70, 70, true);
-    		((TextView)ViewHolder.get(rowView, R.id.txt_menu_label)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(25));
 			
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setText(item.optString("channel_id", ""));
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setText(item.optString("channel_title", ""));

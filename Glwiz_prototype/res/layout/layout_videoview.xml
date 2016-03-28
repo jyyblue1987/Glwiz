@@ -138,8 +138,9 @@
         android:layout_gravity="center"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:orientation="vertical"
-        android:visibility="visible" >
+        android:visibility="gone"
+        android:orientation="vertical"        
+        >
         <ProgressBar
             android:id="@+id/buffering_progress"
             style="@android:style/Widget.ProgressBar.Large"

@@ -42,6 +42,7 @@
 	            android:layout_width="match_parent"
 	            android:layout_height="match_parent"
 	            android:cacheColorHint="#00000000"
+	            android:listSelector="@drawable/subcategory_bg"
 	            android:scrollbars="none"
 	            android:divider="@drawable/subcategory_dividedline"
 	            >

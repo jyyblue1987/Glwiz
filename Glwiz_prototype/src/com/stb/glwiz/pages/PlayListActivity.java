@@ -29,6 +29,7 @@ import common.design.layout.LayoutUtils;
 import common.design.layout.ScreenAdapter;
 import common.image.load.ImageUtils;
 import common.library.utils.AlgorithmUtils;
+import common.library.utils.DataUtils;
 import common.library.utils.MessageUtils;
 import common.list.adapter.ItemCallBack;
 import common.list.adapter.MyListAdapter;
@@ -41,6 +42,9 @@ public class PlayListActivity extends HeaderBarActivity {
 	ListView				m_listMainMenu = null;
 	ListView				m_listCategoryMenu = null;
 	GridView				m_gridItems	= null;
+	
+	List<JSONObject>		m_listCategory = new ArrayList<JSONObject>();
+	JSONArray				m_arrayChannel = new JSONArray();
 	
 	MyListAdapter 			m_adapterMenu = null;
 	MyListAdapter 			m_adapterSubcategory = null;
@@ -82,7 +86,6 @@ public class PlayListActivity extends HeaderBarActivity {
 		
 		initMenuItems();
 		initSubcategoryItems();
-		getPlayListItem("21");
 	}
 	
 	private void initMenuItems()
@@ -109,36 +112,65 @@ public class PlayListActivity extends HeaderBarActivity {
     	m_adapterMenu = new MenuAdapter(this, list, R.layout.fragment_category_item, null);		
 		m_listMainMenu.setAdapter(m_adapterMenu);	
 		
-		m_listMainMenu.setSelection(0);
-		m_listMainMenu.setItemChecked(0, true);
-		m_listMainMenu.setFocusable(true);
 	}
 	
 	private void initSubcategoryItems()
 	{
-		m_nSubcategorySelectedNumber = 0;
-		
-		String [] englishLabel = {"My Favorites", "All", "News", "Sports", "Movies", "Music and Entertaintment", "Kids", "By Region", "Other language"};
-		String [] indiaLabel = {"My Favorites", "All", "News", "Sports", "Movies", "Music and Entertaintment", "Kids", "By Region", "Other language"};
-		
-		List<JSONObject> list = new ArrayList<JSONObject>();
-		for(int i = 0; i < englishLabel.length; i++)
-    	{
-    		JSONObject item = new JSONObject();
-    		
-    		try {
-				item.put("english", englishLabel[i]);
-				item.put("india", indiaLabel[i]);
-				list.add(item);
-			} catch (JSONException e) {			
-				e.printStackTrace();
-			}	
-    	}
-		
-		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
-		m_listCategoryMenu.setAdapter(m_adapterSubcategory);	
+		getSubcategory();
+			
 	}
 
+	private void getSubcategory()
+	{
+		showLoadingProgress();
+		
+		String userid = DataUtils.getPreference(Const.USER_ID, "");
+		
+		ServerManager.getCategoryList(userid, new ResultCallBack() {
+			
+			@Override
+			public void doAction(LogicResult result) {
+				JSONObject data = result.getData();
+				if( data == null || data.has("category_list") == false )
+				{
+					hideProgress();
+					return;
+				}		
+				
+				JSONArray array = data.optJSONArray("category_list");
+				m_listCategory = AlgorithmUtils.jsonarrayToList(array);
+				
+				showSubcategoryList(m_listCategory);						
+				if( getPlayListItem(m_listCategory, 0) == false )
+					hideProgress();
+			}
+		});
+	}
+	
+	private void showSubcategoryList(List<JSONObject> list)
+	{
+		m_nSubcategorySelectedNumber = 0;
+		
+		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
+		m_listCategoryMenu.setAdapter(m_adapterSubcategory);		
+	}
+	
+	private boolean getPlayListItem(List<JSONObject> list, int num)
+	{
+		if( list == null )
+			return false;
+		
+		if( num < 0 || num > list.size() - 1 )
+			return false;
+		
+		JSONObject subcategory = list.get(num);
+		if( subcategory == null )
+			return false;
+		
+		getPlayListItem(subcategory.optString("category_id", "0"));
+		return true;
+	}
+		
 	private void getPlayListItem(String category_id)
 	{
 		showLoadingProgress();
@@ -157,6 +189,7 @@ public class PlayListActivity extends HeaderBarActivity {
 				}		
 				
 				JSONArray array = data.optJSONArray("channels_list");
+				m_arrayChannel = array;
 				showPlayList(array);								
 			}
 		});
@@ -170,7 +203,7 @@ public class PlayListActivity extends HeaderBarActivity {
 		
 		m_gridItems.setAdapter(m_adapterPlaylist);
 		
-		m_listMainMenu.requestFocus();
+		m_listCategoryMenu.requestFocus();		
 	}
 	
 	protected void initEvents()
@@ -200,13 +233,26 @@ public class PlayListActivity extends HeaderBarActivity {
 			}
 		});
 	
-		
 		m_listCategoryMenu.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				m_nMenuSelectedNumber = position;
+				getPlayListItem(m_adapterSubcategory.getData(), position);
+			}
+		});
+		
+		m_listCategoryMenu.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				m_nSubcategorySelectedNumber = position;
-//				m_adapterSubcategory.notifyDataSetChanged();
+				getPlayListItem(m_adapterSubcategory.getData(), position);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
 			}
 		});
 		
@@ -215,7 +261,6 @@ public class PlayListActivity extends HeaderBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nPlaylistSelectedNumber = position;
-//				m_adapterPlaylist.notifyDataSetChanged();
 				gotoPlayerPage(position);
 			}
 		});
@@ -224,11 +269,17 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private void gotoPlayerPage(int pos)
 	{
-		JSONObject data = m_adapterPlaylist.getItem(pos);
-		if( data == null )
-			return;
-		
 		Bundle bundle = new Bundle();
+		
+		JSONObject data = new JSONObject();
+		
+		try {
+			data.put(Const.POSITION, pos);
+			data.put(Const.ARRAY, m_arrayChannel);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
 		bundle.putString(INTENT_EXTRA, data.toString());
 		ActivityManager.changeActivity(this, PlayerActivity.class, bundle, false, null );
 	}
@@ -298,11 +349,11 @@ public class PlayListActivity extends HeaderBarActivity {
     		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_english), 20, 30, 10, 30, true);
     		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
     		
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 10, 30, 20, 30, true);
-    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
+//    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 10, 30, 20, 30, true);
+//    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
     		
-    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString("english", ""));
-    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setText(item.optString("india", ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString("category_name", ""));
+//    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setText(item.optString("india", ""));
     	}
     }
 	
