@@ -20,9 +20,10 @@
 		    android:layout_marginLeft="50dip"
 		    android:layout_marginRight="50dip"		    
 		    android:numColumns="4"			
+		    android:listSelector="@drawable/category_bg"
 		    android:horizontalSpacing="2dip"
 			android:verticalSpacing="2dip"
-		    android:background="@color/white" >
+		    android:background="@color/app_back_color" >
 		</GridView>    
     </LinearLayout>
         

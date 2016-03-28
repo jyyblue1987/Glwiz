@@ -4,8 +4,7 @@
 	android:layout_width="fill_parent" 
 	android:layout_height="wrap_content"
 	android:orientation="horizontal"	
-	android:gravity="center_vertical"
-	android:background="@drawable/subcategory_bg"
+	android:gravity="center_vertical"	
 	>
 	<TextView
 	    android:id="@+id/txt_english"

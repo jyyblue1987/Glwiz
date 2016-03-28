@@ -17,11 +17,10 @@ import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -109,6 +108,10 @@ public class PlayListActivity extends HeaderBarActivity {
 		
     	m_adapterMenu = new MenuAdapter(this, list, R.layout.fragment_category_item, null);		
 		m_listMainMenu.setAdapter(m_adapterMenu);	
+		
+		m_listMainMenu.setSelection(0);
+		m_listMainMenu.setItemChecked(0, true);
+		m_listMainMenu.setFocusable(true);
 	}
 	
 	private void initSubcategoryItems()
@@ -166,6 +169,8 @@ public class PlayListActivity extends HeaderBarActivity {
 		m_adapterPlaylist = new PlayListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_playlist_item, null);
 		
 		m_gridItems.setAdapter(m_adapterPlaylist);
+		
+		m_listMainMenu.requestFocus();
 	}
 	
 	protected void initEvents()
@@ -177,18 +182,31 @@ public class PlayListActivity extends HeaderBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nMenuSelectedNumber = position;
-				m_adapterMenu.notifyDataSetChanged();
+//				m_adapterMenu.notifyDataSetChanged();
 			}
 		});
 		
-		m_listMainMenu.requestFocus();
+		m_listMainMenu.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				m_listCategoryMenu.setSelection(0);
+				m_listCategoryMenu.setItemChecked(0, true);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
+			}
+		});
+	
 		
 		m_listCategoryMenu.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nSubcategorySelectedNumber = position;
-				m_adapterSubcategory.notifyDataSetChanged();
+//				m_adapterSubcategory.notifyDataSetChanged();
 			}
 		});
 		
@@ -197,42 +215,11 @@ public class PlayListActivity extends HeaderBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nPlaylistSelectedNumber = position;
-				m_adapterPlaylist.notifyDataSetChanged();
+//				m_adapterPlaylist.notifyDataSetChanged();
 				gotoPlayerPage(position);
 			}
 		});
-		m_gridItems.setOnKeyListener(new OnKeyListener() {
-			
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				switch (keyCode) {
-				case KeyEvent.KEYCODE_DPAD_DOWN:				
-				case KeyEvent.KEYCODE_DPAD_UP:
-					return true;
-				case KeyEvent.KEYCODE_DPAD_LEFT:
-					if( event.getAction() == KeyEvent.ACTION_UP)
-					{
-						m_nMenuSelectedNumber = (m_nMenuSelectedNumber - 1) % m_gridItems.getCount();
-						m_gridItems.setSelection(m_nMenuSelectedNumber);
-//						m_adapterItemGrid.notifyDataSetChanged();
-					}
-					return false;
-				case KeyEvent.KEYCODE_DPAD_RIGHT:
-					if( event.getAction() == KeyEvent.ACTION_UP)
-					{
-						m_nMenuSelectedNumber = (m_nMenuSelectedNumber + 1) % m_gridItems.getCount();
-						m_gridItems.setSelection(m_nMenuSelectedNumber);
-//						m_adapterItemGrid.notifyDataSetChanged();
-					}
-					return false;
-
-				case KeyEvent.KEYCODE_BACK:
-					break;
-				}
-				return false;
-			}
-		});
-		
+				
 	}
 	
 	private void gotoPlayerPage(int pos)
@@ -244,8 +231,34 @@ public class PlayListActivity extends HeaderBarActivity {
 		Bundle bundle = new Bundle();
 		bundle.putString(INTENT_EXTRA, data.toString());
 		ActivityManager.changeActivity(this, PlayerActivity.class, bundle, false, null );
-
 	}
+	
+//	@Override
+//	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		if (handleKeyDown(keyCode, event)) {
+//			return true;
+//		}
+//		return super.onKeyDown(keyCode, event);
+//	}
+//	
+//	@Override
+//	public boolean onKeyUp(int keyCode, KeyEvent event) {		
+//		if (handleKeyUp(keyCode, event)) {
+//			return true;
+//		}
+//		return super.onKeyDown(keyCode, event);
+//	}
+//	
+//	private boolean handleKeyDown(int keyCode, KeyEvent event)
+//	{
+//		
+//		return false;
+//	}
+//	
+//	private boolean handleKeyUp(int keyCode, KeyEvent event)
+//	{
+//		return false;
+//	}
 	
 	class MenuAdapter extends MyListAdapter{
 
@@ -267,12 +280,6 @@ public class PlayListActivity extends HeaderBarActivity {
     		
     		((ImageView)ViewHolder.get(rowView, R.id.img_thumbnail)).setImageResource(item.optInt("icon", R.drawable.ic_launcher));
     		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setText(item.optString("label", ""));    		
-    		
-    		if( m_nMenuSelectedNumber == position )
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.menu_selected);
-    		else
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.menu_normal);
-    			
     	}
     }
 	 
@@ -296,11 +303,6 @@ public class PlayListActivity extends HeaderBarActivity {
     		
     		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString("english", ""));
     		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setText(item.optString("india", ""));
-    		
-    		if( m_nSubcategorySelectedNumber == position )
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.subcategory_selected);
-    		else
-    			ViewHolder.get(rowView, R.id.lay_fragment).setBackgroundResource(R.drawable.subcategory_normal);
     	}
     }
 	

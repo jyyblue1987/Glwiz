@@ -15,6 +15,7 @@ import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -111,9 +112,13 @@ public class PlayerActivity extends BaseActivity {
 			}			
 		}
 		
+		findViewById(R.id.lay_channel_info).setVisibility(View.GONE);
+		findViewById(R.id.lay_channel_list).setVisibility(View.GONE);
+		
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
 		playChannel(m_channelInfo);
+		
 	}
 	
 	protected void initEvents()
@@ -143,6 +148,67 @@ public class PlayerActivity extends BaseActivity {
 		m_listChannelList.setAdapter(m_adapterChannel);
 	}
 	
+	private void showPannels()
+	{
+		findViewById(R.id.lay_channel_info).setVisibility(View.VISIBLE);
+		findViewById(R.id.lay_channel_list).setVisibility(View.VISIBLE);
+	}
+	private void hidePannels()
+	{
+		findViewById(R.id.lay_channel_info).setVisibility(View.GONE);
+		findViewById(R.id.lay_channel_list).setVisibility(View.GONE);
+	}
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (handleKeyDown(keyCode, event)) {
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {		
+		if (handleKeyUp(keyCode, event)) {
+			return true;
+		}
+		return super.onKeyUp(keyCode, event);
+	}
+	
+	private boolean handleKeyDown(int keyCode, KeyEvent event)
+	{
+		return false;
+	}
+	
+	private boolean handleKeyUp(int keyCode, KeyEvent event)
+	{
+		if( keyCode == KeyEvent.KEYCODE_DPAD_CENTER )
+		{
+			showPannels();
+		}
+		if( keyCode == KeyEvent.KEYCODE_BACK )
+		{
+			return onBackButtonPressed();
+		}
+		return false;
+	}
+	
+	private boolean isShowPannel()
+	{
+		if( findViewById(R.id.lay_channel_info).getVisibility() == View.VISIBLE )
+			return true;
+		
+		return false;		
+	}
+	private boolean onBackButtonPressed()
+	{
+		if( isShowPannel() == true )
+		{
+			hidePannels();
+			return true;
+		}
+		else
+			return false;
+	}
 	class ChannelListAdapter extends MyListAdapter {
 		public ChannelListAdapter(Context context, List<JSONObject> data,
 			int resource, ItemCallBack callback) {
