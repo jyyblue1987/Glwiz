@@ -26,6 +26,7 @@ import common.design.layout.LayoutUtils;
 import common.design.layout.ScreenAdapter;
 import common.image.load.ImageUtils;
 import common.library.utils.AlgorithmUtils;
+import common.library.utils.AnimationUtils;
 import common.list.adapter.ItemCallBack;
 import common.list.adapter.MyListAdapter;
 import common.list.adapter.ViewHolder;
@@ -47,6 +48,9 @@ public class PlayerActivity extends BaseActivity {
 	JSONObject		m_channelInfo = new JSONObject();
 	int				m_nChannelSelectedNumber = 0;
 	
+	View			m_channelInfoPanel = null;
+	View			m_channelListPanel = null;
+	
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -64,6 +68,9 @@ public class PlayerActivity extends BaseActivity {
 		m_MediaController = new MediaController(this);
 		mVideoView.setMediaController(m_MediaController);
 //		mBufferingIndicator = findViewById(R.id.buffering_indicator);
+		
+		m_channelInfoPanel = findViewById(R.id.lay_channel_info);
+		m_channelListPanel = findViewById(R.id.lay_channel_list);		
 		
 		m_txtChannelNumber = (TextView) findViewById(R.id.txt_channel_num);
 		m_txtChannelTitle = (TextView) findViewById(R.id.txt_channel_title);
@@ -114,8 +121,8 @@ public class PlayerActivity extends BaseActivity {
 			}			
 		}
 		
-		findViewById(R.id.lay_channel_info).setVisibility(View.GONE);
-		findViewById(R.id.lay_channel_list).setVisibility(View.GONE);
+		m_channelInfoPanel.setVisibility(View.GONE);
+		m_channelListPanel.setVisibility(View.GONE);
 		
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
@@ -141,6 +148,7 @@ public class PlayerActivity extends BaseActivity {
 	
 	private void playChannel(int pos)
 	{
+		m_nChannelSelectedNumber = pos;
 		JSONArray array = m_channelInfo.optJSONArray(Const.ARRAY);
 		JSONObject channel = array.optJSONObject(pos);
 		m_txtChannelNumber.setText("CH " + channel.optString(Const.CHANNEL_ID, "001"));
@@ -167,16 +175,52 @@ public class PlayerActivity extends BaseActivity {
 	
 	private void showPannels()
 	{
-		findViewById(R.id.lay_channel_info).setVisibility(View.VISIBLE);
-		findViewById(R.id.lay_channel_list).setVisibility(View.VISIBLE);
-		
-		m_listChannelList.requestFocus();
+		showChannelInfoPanel();
+		showChannelListPanel();		
 	}
 	private void hidePannels()
 	{
-		findViewById(R.id.lay_channel_info).setVisibility(View.GONE);
-		findViewById(R.id.lay_channel_list).setVisibility(View.GONE);
+		hideChannelInfoPanel();
+		hideChannelListPanel();
 	}
+	
+	private void showChannelListPanel()
+	{
+		if (m_channelListPanel.getVisibility() != View.VISIBLE) {
+			// animate list panel
+			m_channelListPanel.setVisibility(View.VISIBLE);
+			m_channelListPanel.startAnimation(AnimationUtils.inFromLeftAnimation());
+		}
+	}
+	
+	private void hideChannelListPanel()
+	{
+		if (m_channelListPanel.getVisibility() == View.VISIBLE) {
+			// animate list panel
+			m_channelListPanel.startAnimation(AnimationUtils.outToLeftAnimation());
+			m_channelListPanel.setVisibility(View.GONE);
+		}
+	}
+	
+	private void showChannelInfoPanel()
+	{
+		if (m_channelInfoPanel.getVisibility() != View.VISIBLE) {
+			// animate info panel
+			m_channelInfoPanel.setVisibility(View.VISIBLE);
+			m_channelInfoPanel.startAnimation(AnimationUtils.inFromTopAnimation());
+			m_listChannelList.requestFocus();
+		}
+	}
+	
+	private void hideChannelInfoPanel()
+	{
+		if (m_channelInfoPanel.getVisibility() == View.VISIBLE) {
+			// animate info panel
+			m_channelInfoPanel.startAnimation(AnimationUtils.outToTopAnimation());
+			m_channelInfoPanel.setVisibility(View.GONE);
+		}
+	}
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (handleKeyDown(keyCode, event)) {
@@ -208,6 +252,19 @@ public class PlayerActivity extends BaseActivity {
 		{
 			return onBackButtonPressed();
 		}
+		
+		if( keyCode == KeyEvent.KEYCODE_CHANNEL_UP || 
+			keyCode == KeyEvent.KEYCODE_DPAD_UP	)
+		{
+			return onUpButtonPressed();
+		}
+		
+		if( keyCode == KeyEvent.KEYCODE_CHANNEL_DOWN || 
+				keyCode == KeyEvent.KEYCODE_DPAD_DOWN	)
+		{
+			return onDownButtonPressed();
+		}
+		
 		return false;
 	}
 	
@@ -237,6 +294,74 @@ public class PlayerActivity extends BaseActivity {
 		}
 		else
 			return false;
+	}
+	
+	private boolean onUpButtonPressed()
+	{
+		if( isShowPannel() == true )
+		{
+			return false;
+		}
+		else
+		{
+			playPrevChannel();
+			return true;
+		}
+	}
+	
+	private boolean onDownButtonPressed()
+	{
+		if( isShowPannel() == true )
+		{
+			return false;			
+		}
+		else
+		{
+			playNextChannel();
+			return true;
+		}
+	}
+	
+	private void playPrevChannel()
+	{
+		int position = m_nChannelSelectedNumber;
+		
+		int count = m_listChannelList.getCount();
+		if( count < 1 )
+			return;
+		
+		int pos = (position + count - 1) % count;
+		playChannel(pos);
+		
+		showChannelInfoPanel();
+		
+		m_channelInfoPanel.postDelayed(new Runnable() {
+		    @Override
+		    public void run() {
+		    	hideChannelInfoPanel();
+		    }
+		}, 4000);
+	}
+	
+	private void playNextChannel()
+	{
+		int position = m_nChannelSelectedNumber;
+		
+		int count = m_listChannelList.getCount();
+		if( count < 1 )
+			return;
+		
+		int pos = (position + count + 1) % count;
+		playChannel(pos);
+		
+		showChannelInfoPanel();
+		
+		m_channelInfoPanel.postDelayed(new Runnable() {
+		    @Override
+		    public void run() {
+		    	hideChannelInfoPanel();
+		    }
+		}, 4000);		
 	}
 	class ChannelListAdapter extends MyListAdapter {
 		public ChannelListAdapter(Context context, List<JSONObject> data,
