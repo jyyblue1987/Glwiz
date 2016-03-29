@@ -44,4 +44,16 @@ public class AlgorithmUtils {
 		 
 		 return list;		 
 	 }	 
+	 
+	 public static JSONArray listTojsonarray(List<JSONObject> list)
+	 {
+		 JSONArray array = new JSONArray();
+		 if( list == null )
+			 return array;
+		 
+		 for(int i = 0; i < list.size(); i++ )
+			 array.put(list.get(i));
+		 
+		 return array;		 
+	 }
 }

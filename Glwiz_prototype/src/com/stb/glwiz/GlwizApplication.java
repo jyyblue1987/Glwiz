@@ -7,6 +7,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.stb.glwiz.data.DBManager;
 
 import android.app.Application;
 import android.content.Context;
@@ -39,6 +40,7 @@ public class GlwizApplication extends Application {
 		   DataUtils.setContext(this);
 		   NetworkUtils.setContext(this);
 		   MessageUtils.setApplicationContext(this);
+		   DBManager.loadDB(this);
 	   }
 	   
 	   private void initImageLoader(Context context) {

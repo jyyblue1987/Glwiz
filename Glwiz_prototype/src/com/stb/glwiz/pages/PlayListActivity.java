@@ -11,6 +11,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.stb.glwiz.Const;
 import com.stb.glwiz.R;
+import com.stb.glwiz.data.DBManager;
 import com.stb.glwiz.network.ServerManager;
 
 import android.app.ActionBar.LayoutParams;
@@ -140,8 +141,11 @@ public class PlayListActivity extends HeaderBarActivity {
 				JSONArray array = data.optJSONArray("category_list");
 				m_listCategory = AlgorithmUtils.jsonarrayToList(array);
 				
-				showSubcategoryList(m_listCategory);						
-				if( getPlayListItem(m_listCategory, 0) == false )
+				showSubcategoryList(m_listCategory);		
+				
+				m_listCategoryMenu.setItemChecked(1, true);
+				
+				if( getPlayListItem(m_listCategory, 1) == false )
 					hideProgress();
 			}
 		});
@@ -150,6 +154,18 @@ public class PlayListActivity extends HeaderBarActivity {
 	private void showSubcategoryList(List<JSONObject> list)
 	{
 		m_nSubcategorySelectedNumber = 0;
+		
+		JSONObject favorite = new JSONObject();
+		
+		try {
+			favorite.put(Const.CATEGORY_ID, "-1");
+			favorite.put(Const.CATEGORY_NAME, "My Favorites");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		list.add(0, favorite);
 		
 		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
 		m_listCategoryMenu.setAdapter(m_adapterSubcategory);		
@@ -167,12 +183,23 @@ public class PlayListActivity extends HeaderBarActivity {
 		if( subcategory == null )
 			return false;
 		
-		getPlayListItem(subcategory.optString("category_id", "0"));
+		getPlayListItem(subcategory.optString(Const.CATEGORY_ID, "0"));
 		return true;
 	}
 		
 	private void getPlayListItem(String category_id)
 	{
+		if( category_id.equals("-1") ) // favorite
+		{
+			List<JSONObject> list = DBManager.getFavoriteList(this);
+			m_adapterPlaylist = new PlayListAdapter(this, list, R.layout.fragment_playlist_item, null);
+			m_arrayChannel = AlgorithmUtils.listTojsonarray(list);
+			
+			m_gridItems.setAdapter(m_adapterPlaylist);
+			m_listCategoryMenu.requestFocus();		
+			return;
+		}
+		
 		showLoadingProgress();
 		
 		ServerManager.getChannelList(category_id, new ResultCallBack() {
@@ -352,7 +379,7 @@ public class PlayListActivity extends HeaderBarActivity {
 //    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 10, 30, 20, 30, true);
 //    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(43));
     		
-    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString("category_name", ""));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_english)).setText(item.optString(Const.CATEGORY_NAME, ""));
 //    		((TextView)ViewHolder.get(rowView, R.id.txt_india)).setText(item.optString("india", ""));
     	}
     }

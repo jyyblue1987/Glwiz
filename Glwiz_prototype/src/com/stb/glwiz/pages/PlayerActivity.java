@@ -13,6 +13,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.stb.glwiz.Const;
 import com.stb.glwiz.R;
+import com.stb.glwiz.data.DBManager;
 import com.stb.glwiz.pages.CategoryActivity.ItemGridAdapter;
 
 import android.app.ActionBar.LayoutParams;
@@ -158,9 +159,10 @@ public class PlayerActivity extends BaseActivity {
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
 		int pos = m_channelInfo.optInt(Const.POSITION, 0);		
-		playChannel(pos);		
 		showChannelList(m_channelInfo.optJSONArray(Const.ARRAY));
 		m_listChannelList.setSelection(pos);
+		
+		playChannel(pos);
 		
 		popupChannelInfo();
 	}
@@ -217,7 +219,11 @@ public class PlayerActivity extends BaseActivity {
 	
 	private void addFavourite()
 	{
+		JSONArray array = m_channelInfo.optJSONArray(Const.ARRAY);
+		JSONObject channel = array.optJSONObject(m_nChannelSelectedNumber);
 		
+		DBManager.addFavorite(this, channel);
+		hidePannels();
 	}
 	
 	private void playChannel(int pos)
