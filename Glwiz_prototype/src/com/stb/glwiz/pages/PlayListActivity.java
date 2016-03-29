@@ -53,7 +53,6 @@ public class PlayListActivity extends HeaderBarActivity {
 	MyListAdapter 			m_adapterPlaylist = null;
 	
 	int						m_nMenuSelectedNumber = 0;
-	int						m_nSubcategorySelectedNumber = 0;
 	int						m_nPlaylistSelectedNumber = 0;
 	
 	@Override
@@ -174,8 +173,6 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private void showSubcategoryList(List<JSONObject> list)
 	{
-		m_nSubcategorySelectedNumber = 0;
-		
 		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
 		m_listCategoryMenu.setAdapter(m_adapterSubcategory);		
 	}
@@ -215,10 +212,16 @@ public class PlayListActivity extends HeaderBarActivity {
 	{
 		if( category_id.equals("-1") ) // favorite
 		{
-			List<JSONObject> list = DBManager.getFavoriteList(this);
-			
-			refreshPlayList(list);
-			m_arrayChannel = AlgorithmUtils.listTojsonarray(list);
+			m_listCategoryMenu.postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					List<JSONObject> list = DBManager.getFavoriteList(PlayListActivity.this);
+					
+					refreshPlayList(list);
+					m_arrayChannel = AlgorithmUtils.listTojsonarray(list);				
+				}
+			}, 100);
 			
 			return;
 		}
@@ -300,7 +303,6 @@ public class PlayListActivity extends HeaderBarActivity {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				m_nSubcategorySelectedNumber = position;
 				getPlayListItem(m_adapterSubcategory.getData(), position);
 			}
 
@@ -325,10 +327,9 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private boolean showLiveTVList()
 	{
-		showSubcategoryList(m_listCategory);				
-		m_listCategoryMenu.setItemChecked(1, true);
+		showSubcategoryList(m_listCategory);
 		
-		return getPlayListItem(m_listCategory, 1);		
+		return getPlayListItem(m_listCategory, 0);		
 	}
 	
 	private void gotoPlayerPage(int pos)
