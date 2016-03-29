@@ -135,7 +135,7 @@ public class PlayListActivity extends HeaderBarActivity {
 
 	private void getSubcategory()
 	{
-		showLoadingProgress();
+//		showLoadingProgress();
 		
 		String userid = DataUtils.getPreference(Const.USER_ID, "");
 		
@@ -226,7 +226,7 @@ public class PlayListActivity extends HeaderBarActivity {
 			return;
 		}
 		
-		showLoadingProgress();
+//		showLoadingProgress();
 		
 		ServerManager.getChannelList(category_id, new ResultCallBack() {
 			

@@ -138,7 +138,7 @@ public class BaseActivity extends Activity implements BaseView {
 
 	@Override
 	public void hideProgress() {
-//		progressDialog.dismiss();	
+		progressDialog.dismiss();	
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class BaseActivity extends Activity implements BaseView {
     
     public void showLoadingProgress()
     {
-//    	showProgress("", "Please wait");
+    	showProgress("", "Please wait");
     }
     
     protected void showLabels()

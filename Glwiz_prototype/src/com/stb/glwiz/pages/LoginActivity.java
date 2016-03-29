@@ -98,7 +98,7 @@ public class LoginActivity extends BaseActivity {
 						 gotoCategoryListPage();
 						 return;
 					 }
-					 MessageUtils.showMessageDialog(LoginActivity.this, data.optString("message", ""));
+					 MessageUtils.showMessageDialog(LoginActivity.this, data.optString("message", "Server is not responding"));
 					return;
 				}		
 				
