@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <include
+        android:id="@+id/fragment_header"
+        layout="@layout/fragment_header" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        >
+        
+        <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" 
+	        android:orientation="vertical"
+	        android:gravity="center"
+	        >
+	        
+	     	<include
+		        android:id="@+id/fragment_username"
+		        layout="@layout/fragment_label_edit" />
+	        <include
+		        android:id="@+id/fragment_deviceid"
+		        layout="@layout/fragment_label_edit" />
+	        <include
+		        android:id="@+id/fragment_email"
+		        layout="@layout/fragment_label_edit" />
+	        <include
+		        android:id="@+id/fragment_address"
+		        layout="@layout/fragment_label_edit" />
+	        <include
+		        android:id="@+id/fragment_activestate"
+		        layout="@layout/fragment_label_edit" />
+	    </LinearLayout>
+        
+        
+        
+        
+    </ScrollView>
+            
+    
+</LinearLayout>

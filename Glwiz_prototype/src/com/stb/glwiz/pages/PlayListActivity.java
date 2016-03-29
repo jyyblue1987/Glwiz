@@ -2,7 +2,6 @@ package com.stb.glwiz.pages;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +19,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -54,6 +54,8 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	int						m_nMenuSelectedNumber = 0;
 	int						m_nPlaylistSelectedNumber = 0;
+	
+	boolean					m_blistCategoryMenu = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +93,6 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private void initMenuItems()
 	{
-		m_nMenuSelectedNumber = 0;
-		
 		String [] menuLabel = {"Home", "LiveTV", "Radio", "My account"};
 		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.radio_icon, R.drawable.account_icon};
 		
@@ -253,6 +253,12 @@ public class PlayListActivity extends HeaderBarActivity {
 		refreshPlayList(AlgorithmUtils.jsonarrayToList(array));				
 	}
 	
+	private void gotoProfilePage()
+	{
+		Bundle bundle = new Bundle();
+		ActivityManager.changeActivity(this, ProfileActivity.class, bundle, true, null );
+	}
+	
 	protected void initEvents()
 	{ 
 		super.initEvents();
@@ -271,7 +277,7 @@ public class PlayListActivity extends HeaderBarActivity {
 				
 				if( position == 3 )	// My account
 				{
-//					showLiveTVList();
+					gotoProfilePage();
 				}
 //				m_adapterMenu.notifyDataSetChanged();
 			}
@@ -308,9 +314,6 @@ public class PlayListActivity extends HeaderBarActivity {
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				int i = 0;
-				if( i < 0 )
-					i = 0;
 			}
 		});
 		

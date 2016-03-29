@@ -58,7 +58,7 @@
 		    android:layout_weight="0.7"
 		    android:horizontalSpacing="2dip"
 			android:verticalSpacing="2dip"
-		    android:background="@color/app_back_color"
+		    android:background="@color/app_highlight_back_color"
 		    >
 		</GridView>    
     </LinearLayout>

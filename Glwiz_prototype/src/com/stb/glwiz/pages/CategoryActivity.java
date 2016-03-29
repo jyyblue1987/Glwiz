@@ -91,19 +91,32 @@ public class CategoryActivity extends HeaderBarActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				gotoPlayListPage(position);
+				gotoOtherPage(position);
 			}
 		});		
 	}
 	
-	private void gotoPlayListPage(int position)
+	private void gotoOtherPage(int position)
 	{
-		if( position == 1 || position == 2 )
-			return;
+		if( position == 0 )
+			gotoPlayListPage();
 		
+		if( position == 3 )
+			gotoProfilePage();
+				
+	}
+	
+	private void gotoPlayListPage()
+	{
 		Bundle bundle = new Bundle();
-		bundle.putString(INTENT_EXTRA, position + "");
+		bundle.putString(INTENT_EXTRA, "0");
 		ActivityManager.changeActivity(this, PlayListActivity.class, bundle, false, null );
+	}
+	
+	private void gotoProfilePage()
+	{
+		Bundle bundle = new Bundle();
+		ActivityManager.changeActivity(this, ProfileActivity.class, bundle, false, null );
 	}
 	
 	class ItemGridAdapter extends MyListAdapter{
