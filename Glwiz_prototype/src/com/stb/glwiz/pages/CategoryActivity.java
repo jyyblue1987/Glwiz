@@ -49,11 +49,12 @@ public class CategoryActivity extends HeaderBarActivity {
 	{
 		super.initData();
 		
+		m_txtMainMenu.setText("");
 		
 		String [] categoryLabel = {"Live TV", "Radio", "Movie", "My account"};
 		int [] categoryIcon = {R.drawable.livetv_icon, R.drawable.movie_icon, R.drawable.radio_icon, R.drawable.account_icon};
 		
-		List<JSONObject> videoList = new ArrayList<JSONObject>();
+		List<JSONObject> list = new ArrayList<JSONObject>();
 		for(int i = 0; i < categoryLabel.length; i++)
     	{
     		JSONObject item = new JSONObject();
@@ -61,12 +62,12 @@ public class CategoryActivity extends HeaderBarActivity {
     		try {
 				item.put("label", categoryLabel[i]);
 				item.put("icon", categoryIcon[i]);
-				videoList.add(item);
+				list.add(item);
 			} catch (JSONException e) {			
 				e.printStackTrace();
 			}	
     	}
-    	m_adapterItemGrid = new ItemGridAdapter(this, videoList, R.layout.fragment_category_item, null);
+    	m_adapterItemGrid = new ItemGridAdapter(this, list, R.layout.fragment_category_item, null);
 		
     	m_gridItems.setAdapter(m_adapterItemGrid);
     	
@@ -97,7 +98,11 @@ public class CategoryActivity extends HeaderBarActivity {
 	
 	private void gotoPlayListPage(int position)
 	{
+		if( position == 1 || position == 2 )
+			return;
+		
 		Bundle bundle = new Bundle();
+		bundle.putString(INTENT_EXTRA, position + "");
 		ActivityManager.changeActivity(this, PlayListActivity.class, bundle, false, null );
 	}
 	

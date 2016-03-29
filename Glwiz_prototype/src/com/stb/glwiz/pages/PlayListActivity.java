@@ -2,6 +2,7 @@ package com.stb.glwiz.pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,7 +95,7 @@ public class PlayListActivity extends HeaderBarActivity {
 		m_nMenuSelectedNumber = 0;
 		
 		String [] menuLabel = {"Home", "LiveTV", "Radio", "My account"};
-		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.movie_icon, R.drawable.radio_icon};
+		int [] menuIcon = {R.drawable.home_icon, R.drawable.livetv_icon, R.drawable.radio_icon, R.drawable.account_icon};
 		
 		List<JSONObject> list = new ArrayList<JSONObject>();
 		for(int i = 0; i < menuLabel.length; i++)
@@ -112,7 +113,19 @@ public class PlayListActivity extends HeaderBarActivity {
 		
     	m_adapterMenu = new MenuAdapter(this, list, R.layout.fragment_category_item, null);		
 		m_listMainMenu.setAdapter(m_adapterMenu);	
+
+		Bundle bundle = getIntent().getExtras();
 		
+		m_nMenuSelectedNumber = 1;
+		
+		if( bundle != null )
+		{
+			String intentData = bundle.getString(INTENT_EXTRA, ""); 
+			m_nMenuSelectedNumber = Integer.parseInt(intentData);			
+		}
+		
+		m_listMainMenu.setSelection(m_nMenuSelectedNumber);
+		m_listMainMenu.setItemChecked(m_nMenuSelectedNumber, true);
 	}
 	
 	private void initSubcategoryItems()
@@ -141,11 +154,19 @@ public class PlayListActivity extends HeaderBarActivity {
 				JSONArray array = data.optJSONArray("category_list");
 				m_listCategory = AlgorithmUtils.jsonarrayToList(array);
 				
-				showSubcategoryList(m_listCategory);		
+				JSONObject favorite = new JSONObject();
 				
-				m_listCategoryMenu.setItemChecked(1, true);
+				try {
+					favorite.put(Const.CATEGORY_ID, "-1");
+					favorite.put(Const.CATEGORY_NAME, "My Favorites");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
-				if( getPlayListItem(m_listCategory, 1) == false )
+				m_listCategory.add(0, favorite);
+				
+				if( showLiveTVList() == false )
 					hideProgress();
 			}
 		});
@@ -154,18 +175,6 @@ public class PlayListActivity extends HeaderBarActivity {
 	private void showSubcategoryList(List<JSONObject> list)
 	{
 		m_nSubcategorySelectedNumber = 0;
-		
-		JSONObject favorite = new JSONObject();
-		
-		try {
-			favorite.put(Const.CATEGORY_ID, "-1");
-			favorite.put(Const.CATEGORY_NAME, "My Favorites");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		list.add(0, favorite);
 		
 		m_adapterSubcategory = new SubcategoryAdapter(this, list, R.layout.fragment_subcategory_item, null);		
 		m_listCategoryMenu.setAdapter(m_adapterSubcategory);		
@@ -242,6 +251,17 @@ public class PlayListActivity extends HeaderBarActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				m_nMenuSelectedNumber = position;
+				if( position == 0 ) // Home
+					onBackPressed();
+				if( position == 1 )	// Live TV
+				{
+					showLiveTVList();
+				}
+				
+				if( position == 3 )	// My account
+				{
+//					showLiveTVList();
+				}
 //				m_adapterMenu.notifyDataSetChanged();
 			}
 		});
@@ -250,8 +270,7 @@ public class PlayListActivity extends HeaderBarActivity {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				m_listCategoryMenu.setSelection(0);
-				m_listCategoryMenu.setItemChecked(0, true);
+				m_txtMainMenu.setText(((JSONObject)m_listMainMenu.getItemAtPosition(position)).optString("label", ""));					
 			}
 
 			@Override
@@ -292,6 +311,14 @@ public class PlayListActivity extends HeaderBarActivity {
 			}
 		});
 				
+	}
+	
+	private boolean showLiveTVList()
+	{
+		showSubcategoryList(m_listCategory);				
+		m_listCategoryMenu.setItemChecked(1, true);
+		
+		return getPlayListItem(m_listCategory, 1);		
 	}
 	
 	private void gotoPlayerPage(int pos)
