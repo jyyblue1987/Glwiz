@@ -51,44 +51,20 @@
             android:id="@+id/txt_channel_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1.0"
             android:layout_marginTop="10dip" 
             android:text="Sports"
             android:textColor="@color/white"
             />
-        <LinearLayout
-            android:id="@+id/lay_supermenu"
-            android:visibility="gone"         
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dip"  
-            android:layout_marginRight="10dip"
-            android:orientation="horizontal"
-            android:gravity="right"
-            >
-            <include
-		        android:id="@+id/fragment_livetv"
-		        android:layout_width="30dip"
-		        android:layout_height="30dip"
-		        layout="@layout/fragment_category_item" />
-            <include
-		        android:id="@+id/fragment_favorite"
-		        android:layout_width="30dip"
-		        android:layout_height="30dip"
-		        android:layout_marginLeft="2dip"
-		        layout="@layout/fragment_category_item" />
-            <include
-		        android:id="@+id/fragment_last"
-		        android:layout_width="30dip"
-		        android:layout_height="30dip"
-		        android:layout_marginLeft="2dip"
-		        layout="@layout/fragment_category_item" />
-            <include
-		        android:id="@+id/fragment_help"
-		        android:layout_width="30dip"
-		        android:layout_height="30dip"
-		        android:layout_marginLeft="2dip"
-		        layout="@layout/fragment_category_item" />
-        </LinearLayout>
+        <GridView 
+		    android:id="@+id/grid_item"
+		    android:layout_width="150dip"
+		    android:layout_height="wrap_content"
+		    android:numColumns="3"			
+		    android:horizontalSpacing="2dip"
+			android:verticalSpacing="2dip"
+		    >
+		</GridView>   
     </LinearLayout>
     
     <LinearLayout

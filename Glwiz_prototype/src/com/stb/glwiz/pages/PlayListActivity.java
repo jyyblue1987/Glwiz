@@ -377,11 +377,6 @@ public class PlayListActivity extends HeaderBarActivity {
     		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_india), 0, 20, 0, 0, true);
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
 
-    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.lay_menu), 10, 0, 20, 0, true);
-    		
-    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_menu_icon), 70, 70, true);
-    		((TextView)ViewHolder.get(rowView, R.id.txt_menu_label)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(25));
-			
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_id)).setText(item.optString(Const.CHANNEL_ID, ""));
     		((TextView)ViewHolder.get(rowView, R.id.txt_channel_title)).setText(item.optString(Const.CHANNEL_TITLE, ""));
     		

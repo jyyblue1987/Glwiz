@@ -1,5 +1,6 @@
 package com.stb.glwiz.pages;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,6 +13,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.stb.glwiz.Const;
 import com.stb.glwiz.R;
+import com.stb.glwiz.pages.CategoryActivity.ItemGridAdapter;
 
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
@@ -21,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -56,6 +59,9 @@ public class PlayerActivity extends BaseActivity {
 	TextView		m_txtState = null;
 	TextView		m_txtGotoChannelNumber = null;
 	
+	GridView				m_gridItems	= null;
+	ItemGridAdapter 		m_adapterItemGrid = null;
+	
 	private static Timer mTimer;
 	private static UpdateDurationTask mDurationTask;
 	
@@ -89,6 +95,8 @@ public class PlayerActivity extends BaseActivity {
 		m_txtGotoChannelNumber = (TextView) findViewById(R.id.txt_channel_gotonum);
 		
 		m_listChannelList = (ListView) findViewById(R.id.list_channel);
+		
+		m_gridItems = (GridView) findViewById(R.id.grid_item);
 	}
 	
 	protected void layoutControls()
@@ -106,6 +114,9 @@ public class PlayerActivity extends BaseActivity {
 		LayoutUtils.setMargin(m_txtChannelTitle, 20, 30, 0, 0, true);
 		m_txtChannelTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
 		
+		LayoutUtils.setMargin(m_gridItems, 0, 30, 20, 20, true);
+		LayoutUtils.setSize(m_gridItems, 300, LayoutParams.MATCH_PARENT, true);
+		
 		LayoutUtils.setMargin(findViewById(R.id.lay_channel_list), ScreenAdapter.computeWidth(25), ScreenAdapter.computeWidth(160) + ScreenAdapter.computeHeight(25), 0, ScreenAdapter.computeHeight(15), false);		
 		LayoutUtils.setSize(findViewById(R.id.lay_channel_list), ScreenAdapter.getDeviceWidth() / 3, LayoutParams.MATCH_PARENT, false);
 		
@@ -118,6 +129,8 @@ public class PlayerActivity extends BaseActivity {
 		m_txtChannelCount.setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
 		m_txtGotoChannelNumber.setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(40));
 		LayoutUtils.setMargin(m_txtGotoChannelNumber, 0, 20, 20, 0, true);		
+		
+		
 	}
 	
 	protected void initData()
@@ -140,6 +153,8 @@ public class PlayerActivity extends BaseActivity {
 		m_txtGotoChannelNumber.setVisibility(View.GONE);
 		m_txtGotoChannelNumber.setText("");
 		
+		initTopMenus();
+		
 		mVideoView.setVideoLayout(VideoView.VIDEO_LAYOUT_STRETCH);
 		
 		int pos = m_channelInfo.optInt(Const.POSITION, 0);		
@@ -150,6 +165,28 @@ public class PlayerActivity extends BaseActivity {
 		popupChannelInfo();
 	}
 	
+	private void initTopMenus()
+	{
+		String [] categoryLabel = {"TV List", "Favorits", "Back"};
+		int [] categoryIcon = {R.drawable.tvlist_icon, R.drawable.favorite_icon, R.drawable.back_icon};
+		
+		List<JSONObject> videoList = new ArrayList<JSONObject>();
+		for(int i = 0; i < categoryLabel.length; i++)
+    	{
+    		JSONObject item = new JSONObject();
+    		
+    		try {
+				item.put("label", categoryLabel[i]);
+				item.put("icon", categoryIcon[i]);
+				videoList.add(item);
+			} catch (JSONException e) {			
+				e.printStackTrace();
+			}	
+    	}
+    	m_adapterItemGrid = new ItemGridAdapter(this, videoList, R.layout.fragment_category_item, null);
+		
+    	m_gridItems.setAdapter(m_adapterItemGrid);
+	}
 	protected void initEvents()
 	{
 		super.initEvents();
@@ -162,6 +199,25 @@ public class PlayerActivity extends BaseActivity {
 				playChannel(position);
 			}
 		});
+		
+		m_gridItems.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if( position == 0 )
+					showChannelListPanel();
+				if( position == 1 )
+					addFavourite();
+				if( position == 2 )
+					onBackPressed();
+			}
+		});		
+
+	}
+	
+	private void addFavourite()
+	{
+		
 	}
 	
 	private void playChannel(int pos)
@@ -197,7 +253,7 @@ public class PlayerActivity extends BaseActivity {
 	private void showPannels()
 	{
 		showChannelInfoPanel();
-		showChannelListPanel();		
+//		showChannelListPanel();		
 	}
 	private void hidePannels()
 	{
@@ -229,7 +285,11 @@ public class PlayerActivity extends BaseActivity {
 		if (m_channelInfoPanel.getVisibility() != View.VISIBLE) {
 			// animate info panel
 			m_channelInfoPanel.setVisibility(View.VISIBLE);
-			m_channelInfoPanel.startAnimation(AnimationUtils.inFromTopAnimation());			
+			m_channelInfoPanel.startAnimation(AnimationUtils.inFromTopAnimation());
+			
+	    	m_gridItems.requestFocus();
+	    	m_gridItems.setSelection(0);
+	    	m_gridItems.setItemChecked(0, true);
 		}
 	}
 	
@@ -313,7 +373,7 @@ public class PlayerActivity extends BaseActivity {
 			return onDownButtonPressed();
 		}
 		
-		if( KeyEvent.KEYCODE_0 <= keyCode || 
+		if( KeyEvent.KEYCODE_0 <= keyCode && 
 				keyCode <= KeyEvent.KEYCODE_9	)
 		{
 			return onNumberButtonPressed(keyCode - KeyEvent.KEYCODE_0);
@@ -583,6 +643,26 @@ public class PlayerActivity extends BaseActivity {
 			ImageLoader.getInstance().displayImage(item.optString("channel_thumbnail", ""), (ImageView)ViewHolder.get(rowView, R.id.img_thumbnail), options);
 		}	
 	}
-	
+
+	class ItemGridAdapter extends MyListAdapter{
+
+    	public ItemGridAdapter(Context context, List<JSONObject> data, 
+    			int resource, ItemCallBack callback) {
+    		super(context, data, resource, callback);
+    	}
+    	
+    	@Override
+    	protected void loadItemViews(View rowView, final int position)
+    	{
+    		final JSONObject item = getItem(position);
+    		
+    		LayoutUtils.setSize(ViewHolder.get(rowView, R.id.img_thumbnail), 70, 70, true);    		
+    		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setTextSize(TypedValue.COMPLEX_UNIT_PX, ScreenAdapter.computeHeight(20));
+    		LayoutUtils.setMargin(ViewHolder.get(rowView, R.id.txt_name), 0, 0, 0, 0, true);
+    		
+    		((ImageView)ViewHolder.get(rowView, R.id.img_thumbnail)).setImageResource(item.optInt("icon", R.drawable.ic_launcher));
+    		((TextView)ViewHolder.get(rowView, R.id.txt_name)).setText(item.optString("label", ""));    		
+    	}
+    }
 }
 
