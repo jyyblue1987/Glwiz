@@ -2,6 +2,10 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
 	android:dither="true"
 	>
-    <item android:drawable="@drawable/subcategory_selected"
-          android:state_focused="true"/>
+    <item android:state_focused="true"
+        android:drawable="@drawable/subcategory_selected" />
+     <item android:state_activated="true"
+        android:drawable="@drawable/subcategory_selected" />
+    <item android:state_selected="true"               
+        android:drawable="@drawable/subcategory_selected" /> 
 </selector>

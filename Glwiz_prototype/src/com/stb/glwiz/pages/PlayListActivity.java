@@ -196,16 +196,30 @@ public class PlayListActivity extends HeaderBarActivity {
 		return true;
 	}
 		
+	private void refreshPlayList(List<JSONObject> list)
+	{
+		m_nPlaylistSelectedNumber = 0;
+		m_adapterPlaylist = new PlayListAdapter(this, list, R.layout.fragment_playlist_item, null);
+		
+		m_gridItems.setAdapter(m_adapterPlaylist);
+		
+		m_listCategoryMenu.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				m_listCategoryMenu.requestFocus();				
+			}
+		}, 1);
+	}
 	private void getPlayListItem(String category_id)
 	{
 		if( category_id.equals("-1") ) // favorite
 		{
 			List<JSONObject> list = DBManager.getFavoriteList(this);
-			m_adapterPlaylist = new PlayListAdapter(this, list, R.layout.fragment_playlist_item, null);
+			
+			refreshPlayList(list);
 			m_arrayChannel = AlgorithmUtils.listTojsonarray(list);
 			
-			m_gridItems.setAdapter(m_adapterPlaylist);
-			m_listCategoryMenu.requestFocus();		
 			return;
 		}
 		
@@ -233,13 +247,7 @@ public class PlayListActivity extends HeaderBarActivity {
 	
 	private void showPlayList(JSONArray array)
 	{
-		m_nPlaylistSelectedNumber = 0;
-		
-		m_adapterPlaylist = new PlayListAdapter(this, AlgorithmUtils.jsonarrayToList(array), R.layout.fragment_playlist_item, null);
-		
-		m_gridItems.setAdapter(m_adapterPlaylist);
-		
-		m_listCategoryMenu.requestFocus();		
+		refreshPlayList(AlgorithmUtils.jsonarrayToList(array));				
 	}
 	
 	protected void initEvents()
@@ -298,7 +306,9 @@ public class PlayListActivity extends HeaderBarActivity {
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-
+				int i = 0;
+				if( i < 0 )
+					i = 0;
 			}
 		});
 		
